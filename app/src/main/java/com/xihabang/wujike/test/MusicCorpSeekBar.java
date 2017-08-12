@@ -4,20 +4,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.sax.RootElement;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-
-import static android.R.attr.breadCrumbShortTitle;
-import static android.R.attr.isDefault;
-import static android.R.string.no;
-import static android.support.v7.widget.AppCompatDrawableManager.get;
 
 /**
  * Created by wxmylife on 2017/8/10 0010.
@@ -61,6 +53,7 @@ public class MusicCorpSeekBar extends View {
     private int prevX;
     private int downX;//按下起始X点
 
+
     private SeekBarChangeListener changeListener;
 
 
@@ -98,6 +91,7 @@ public class MusicCorpSeekBar extends View {
 
 
     private void initValue(Context context) {
+
         thumbSliceLeft = BitmapFactory.decodeResource(getResources(), resSweepLeft);
         thumbSliceRight = BitmapFactory.decodeResource(getResources(), resSweepRight);
         screenWidth = context.getResources().getDisplayMetrics().widthPixels;
@@ -151,7 +145,7 @@ public class MusicCorpSeekBar extends View {
         super.onDraw(canvas);
         // TODO: 2017/8/11 0011 画出进度条 
         paintThumb.setColor(getResources().getColor(R.color.colorPrimary));
-        canvas.drawRect(0, 0, 0, thumbSliceLeft.getHeight(), paintThumb);
+        canvas.drawRect(0, 0, getWidth(), thumbSliceLeft.getHeight(), paintThumb);
 
         int drawLeft = thumbSliceLeftX;
         int drawRight = thumbSliceRightX;
@@ -239,7 +233,15 @@ public class MusicCorpSeekBar extends View {
                         int right = getRight() + distance;
                         int top = getTop();
                         int bottom = getBottom();
-                        layout(left, top, right, bottom);
+                        // setTranslationX(distance);
+                        // offsetLeftAndRight(left);
+                        // scrollTo(distance,getScrollY());
+                        // requestLayout();
+                        // layout(left, top, right, bottom);
+                        // setTranslationX(distance);
+                        // AdditiveAnimator.animate(this).x(distance).y(getY()).setDuration(1000).start();
+                        offsetLeftAndRight(distance);
+                        // AdditiveAnimator.animate(animatedView).x(event.getX()).y(event.getY()).setDuration(1000).start();
                     } else if (selectedThumb == SELECT_THUMB.SELECT_THUMB_MORE_LEFT) {
                         Log.e("TVT", "--------->>>>SELECT_THUMB_MORE_LEFT");
                         int distance = touchX - prevX;
@@ -248,7 +250,11 @@ public class MusicCorpSeekBar extends View {
                         int right = getRight() + distance;
                         int top = getTop();
                         int bottom = getBottom();
-                        layout(left, top, right, bottom);
+                        offsetLeftAndRight(distance);
+                        // layout(left,top,right,bottom);
+                        // this.setX(left);
+                        // requestLayout();
+                        // layout(left, top, right, bottom);
                     } else if (selectedThumb == SELECT_THUMB.SELECT_THUMB_CENTER) {
                         Log.e("TVT", "--------->>>>SELECT_THUMB_MORE_LEFT");
                         int distance = touchX - prevX;
@@ -460,5 +466,7 @@ public class MusicCorpSeekBar extends View {
         void onSeekStart();
         void onSeekEnd();
     }
+
+
 
 }

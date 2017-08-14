@@ -1,5 +1,7 @@
 package com.xihabang.wujike.test;
 
+import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -14,7 +16,6 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Scroller;
 
 /**
@@ -70,7 +71,7 @@ public class CorpSeekBar extends View {
     private int lastDrawLeft;
     private int lastDrawRight;
 
-    private static final int PADDING_BOTTOM_TOP = 10;
+    private static final int PADDING_BOTTOM_TOP = 5;
     private static final int PADDING_LEFT_RIGHT = 5;
     private static int MERGIN_PADDING = 20;
 
@@ -296,9 +297,30 @@ public class CorpSeekBar extends View {
                         int distance = mx - prevX;
                         // smoothScrollBy(distance,0);
                         if (scl != null) {
-                            scl.SeeKBarChange(mMove);
+                            scl.SeeKBarChange(distance,viewRect.left,thumbSliceLeftX,thumbSliceRightX);
                         }
-                        //             smoothScrollBy(-mMove, 0);
+                       /* LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) getLayoutParams();
+                        layoutParams.leftMargin=getLeft()+distance;
+                        layoutParams.rightMargin=screenWidth-getRight()-distance;
+                        setLayoutParams(layoutParams);*/
+
+                   /*     VelocityTracker velocityTracker=VelocityTracker.obtain();
+                        velocityTracker.addMovement(event);
+
+                        velocityTracker.computeCurrentVelocity(1000);
+                        int xVelocity= (int) velocityTracker.getXVelocity();
+
+                        velocityTracker.clear();
+                        velocityTracker.recycle();*/
+
+                        // 速度=（终点-起点）／时间段
+                        // 平移动画TranslateAnimation
+                        //
+                       int translationX= (int) (getTranslationX()+distance);
+                        setTranslationX(translationX);
+                        // startAn(distance);
+                        // smoothScrollTo(distance,0);
+                        // smoothScrollBy(distance, 0);
                         // smoothScrollBy(xPosition - mLastX, 0);
                         // float rawX = event.getRawX();
                         // float deltaX = rawX - x;
@@ -315,7 +337,9 @@ public class CorpSeekBar extends View {
                             // offsetLeftAndRight((int) deltaX);
                             //  setTranslationX(deltaX);
                         // }
-                        // int distance = mx - prevX;
+                        int distance = mx - prevX;
+                        int translationX= (int) (getTranslationX()+distance);
+                        setTranslationX(translationX);
                         // thumbSliceLeftX += distance;
                     } else if (selectedThumb == SELECT_THUMB.SELECT_THUMB_CENTER) {
                         int distance = mx - prevX;
@@ -353,22 +377,90 @@ public class CorpSeekBar extends View {
     }
 
 
+    public void startAn(int value) {
+        // if (value >= 30 && value <= 120) {
+        AnimatorSet set = new AnimatorSet();
+        set.playTogether(getMoveAnimation(value));
+        set.start();
+        // }
+
+    }
+    //
+    // public void slideview(final float p1, final float p2) {
+    //     TranslateAnimation animation = new TranslateAnimation(p1, p2, 0, 0);
+    //     animation.setInterpolator(new OvershootInterpolator());
+    //     animation.setDuration(1000);
+    //     // animation.setStartOffset(delayMillis);
+    //     animation.setAnimationListener(new Animation.AnimationListener() {
+    //         @Override
+    //         public void onAnimationStart(Animation animation) {
+    //         }
+    //
+    //         @Override
+    //         public void onAnimationRepeat(Animation animation) {
+    //         }
+    //
+    //         @Override
+    //         public void onAnimationEnd(Animation animation) {
+    //             int left = getLeft()+(int)(p2-p1);
+    //             int top = getTop();
+    //             int width = getWidth();
+    //             int height = getHeight();
+    //             clearAnimation();
+    //             layout(left, top, left+width, top+height);
+    //         }
+    //     });
+    //     startAnimation(animation);
+    // }
+
+
+
+
+    public ValueAnimator getMoveAnimation(int value) {
+        ValueAnimator animator = ValueAnimator.ofInt(mMove, value);
+        animator.setDuration(1500);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override public void onAnimationUpdate(ValueAnimator animation) {
+                mMove = (int) animation.getAnimatedValue();
+                invalidate();
+            }
+        });
+        return animator;
+    }
+
+    //调用此方法滚动到目标位置
+    public void smoothScrollTo(int fx, int fy) {
+        int dx = fx - mScroller.getFinalX();
+        int dy = fy - mScroller.getFinalY();
+        smoothScrollBy(dx, dy);
+    }
+
+
     //调用此方法设置滚动的相对偏移
     public void smoothScrollBy(int dx, int dy) {
         Log.e(TAG, "smoothScrollBy:" + dx);
         //设置mScroller的滚动偏移量
         mScroller.startScroll(mScroller.getFinalX(), mScroller.getFinalY(), dx, dy);
+        // invalidate();//这里必须调用invalidate()才能保证computeScroll()会被调用，否则不一定会刷新界面，看不到滚动效
+        // scrollBy(dx, 0);
+        // mScroller.startScroll(mScroller.getFinalX(), mScroller.getFinalY(), dx, dy);
         invalidate();//这里必须调用invalidate()才能保证computeScroll()会被调用，否则不一定会刷新界面，看不到滚动效果
     }
 
     @Override
     public void computeScroll() {
         Log.e(TAG, "-----------computeScroll");
+        //先判断mScroller滚动是否完成
         if (mScroller.computeScrollOffset()) {
-            mMove = mScroller.getCurrX();
-            Log.e(TAG, "mMove:" + mMove);
+            //这里调用View的scrollTo()完成实际的滚动
+
+            scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+            // mMove = mScroller.getCurrX();
+            // Log.e(TAG, "mMove:" + mMove);
+            //必须调用该方法，否则不一定能看到滚动效果
             postInvalidate();
         }
+        super.computeScroll();
     }
 
 
@@ -504,7 +596,7 @@ public class CorpSeekBar extends View {
 
     public interface SeekBarChangeListener {
         void SeekBarValueChanged(float leftThumb, float rightThumb, int whitchSide);
-        void SeeKBarChange(int distance);
+        void SeeKBarChange(int distance,int viewLeft,int leftIconX,int rightIconX);
         void onSeekStart();
         void onSeekEnd();
     }

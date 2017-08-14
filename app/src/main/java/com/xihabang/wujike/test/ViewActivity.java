@@ -3,13 +3,8 @@ package com.xihabang.wujike.test;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-
-import static android.R.attr.width;
 
 /**
  * Created by wxmylife on 2017/8/10 0010.
@@ -19,13 +14,13 @@ public class ViewActivity extends AppCompatActivity {
 
     private CorpSeekBar corpSeekBar;
 
-    private ScrollerLayout layout;
+    // private ScrollerLayout layout;
 
     @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view);
         corpSeekBar= (CorpSeekBar) findViewById(R.id.seekbar);
-        layout= (ScrollerLayout) findViewById(R.id.scrollLayout);
+        // layout= (ScrollerLayout) findViewById(R.id.scrollLayout);
         corpSeekBar.setSeekBarChangeListener(new CorpSeekBar.SeekBarChangeListener() {
             @Override
             public void SeekBarValueChanged(float leftThumb, float rightThumb, int whitchSide) {
@@ -33,8 +28,23 @@ public class ViewActivity extends AppCompatActivity {
             }
 
 
-            @Override public void SeeKBarChange(int distance) {
-                setMargins(corpSeekBar,distance,0,0,0);
+            @Override
+            public void SeeKBarChange(int distance, int viewLeft, int leftIconX, int rightIconX) {
+                // LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) corpSeekBar.getLayoutParams();
+                //
+                //
+                //
+                // layoutParams.leftMargin +=distance;
+                // layoutParams.rightMargin -=distance;
+                //
+                //
+                // if (layoutParams.leftMargin+viewLeft+leftIconX<=0){
+                //     layoutParams.leftMargin=-(viewLeft+leftIconX);
+                // }
+                // // if (layoutParams.rightMargin)
+                //
+                // corpSeekBar.requestLayout();
+                // corpSeekBar.setLayoutParams(layoutParams);
             }
 
 

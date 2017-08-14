@@ -4,20 +4,19 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.xihabang.wujike.test.ScrollerLayout
-        android:id="@+id/scrollLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <!--<com.xihabang.wujike.test.ScrollerLayout-->
+        <!--android:id="@+id/scrollLayout"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content">-->
 
 
-    </com.xihabang.wujike.test.ScrollerLayout>
+    <!--</com.xihabang.wujike.test.ScrollerLayout>-->
     <com.xihabang.wujike.test.CorpSeekBar
         android:id="@+id/seekbar"
         android:layout_width="match_parent"
         android:layout_height="35dp"
+        android:layout_marginLeft="30dip"
+        android:layout_marginRight="30dip"
         android:layout_marginTop="20dp"/>
 
-    <com.xihabang.wujike.test.TestScroll
-        android:layout_width="match_parent"
-        android:layout_height="100dp"/>
 </LinearLayout>

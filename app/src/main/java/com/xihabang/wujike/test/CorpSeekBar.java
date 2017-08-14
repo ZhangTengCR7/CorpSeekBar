@@ -8,14 +8,14 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.support.v4.view.GestureDetectorCompat;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-
-import static android.R.attr.translationX;
-import static android.R.attr.x;
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
+import android.view.ViewGroup;
+import android.widget.Scroller;
 
 /**
  * Created by wxmylife on 2017/8/14 0014.
@@ -76,6 +76,9 @@ public class CorpSeekBar extends View {
 
     private Rect viewRect = new Rect();
 
+    private Scroller mScroller;
+
+    private GestureDetectorCompat gestureDetector;
 
     public CorpSeekBar(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -105,8 +108,9 @@ public class CorpSeekBar extends View {
         }
     }
 
-
     private void initValue(Context context) {
+        mScroller=new Scroller(context);
+        gestureDetector = new GestureDetectorCompat(getContext(), new SimpleGestureListener());
         //        getStyleParam();
         thumbSlice = BitmapFactory.decodeResource(getResources(), resSweepLeft);
         thumbSliceRight = BitmapFactory.decodeResource(getResources(), resSweepRight);
@@ -196,6 +200,16 @@ public class CorpSeekBar extends View {
         return false;
     }
 
+    private class SimpleGestureListener extends
+        GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            mScroller.fling(mMove, 0, (int)velocityX, (int)velocityY, 0, getMeasuredWidth(), 0, 0);
+            return true;
+        }
+    }
+    private int mMove;
+
 
     @SuppressLint("DrawAllocation")
     @Override
@@ -206,42 +220,41 @@ public class CorpSeekBar extends View {
 
         //边线绘制
         paintThumb.setColor(getResources().getColor(resPaddingColor));
-        canvas.drawRect(drawLeft + thumbSlice.getWidth() - PADDING_LEFT_RIGHT, 0f,
-            drawRight + PADDING_LEFT_RIGHT, PADDING_BOTTOM_TOP, paintThumb);
-        canvas.drawRect(drawLeft + thumbSlice.getWidth() - PADDING_LEFT_RIGHT,
-            thumbSlice.getHeight() - PADDING_BOTTOM_TOP, drawRight + PADDING_LEFT_RIGHT,
+        canvas.drawRect(drawLeft + thumbSlice.getWidth()+mMove - PADDING_LEFT_RIGHT, 0f,
+            drawRight + PADDING_LEFT_RIGHT+mMove, PADDING_BOTTOM_TOP, paintThumb);
+        canvas.drawRect(drawLeft + thumbSlice.getWidth() - PADDING_LEFT_RIGHT+mMove,
+            thumbSlice.getHeight() - PADDING_BOTTOM_TOP, drawRight + PADDING_LEFT_RIGHT+mMove,
             thumbSlice.getHeight(), paintThumb);
 
         paintThumb.setColor(getResources().getColor(resBackground));
         paintThumb.setAlpha((int) (255 * 0.9));
 
         //图标中间背景
-        canvas.drawRect(drawLeft + thumbSlice.getWidth() - PADDING_LEFT_RIGHT, PADDING_BOTTOM_TOP,
-            drawRight + PADDING_LEFT_RIGHT, thumbSlice.getHeight() - PADDING_LEFT_RIGHT,
+        canvas.drawRect(drawLeft + thumbSlice.getWidth() - PADDING_LEFT_RIGHT+mMove, PADDING_BOTTOM_TOP,
+            drawRight + PADDING_LEFT_RIGHT+mMove, thumbSlice.getHeight() - PADDING_LEFT_RIGHT,
             paintThumb);
 
         //左右背景
-        canvas.drawRect(0, 0, drawLeft + PADDING_LEFT_RIGHT, thumbSlice.getHeight(), paintThumb);
-        canvas.drawRect(drawRight + thumbSliceRight.getWidth() - PADDING_LEFT_RIGHT, 0, getWidth(),
+        canvas.drawRect(mMove, 0, drawLeft + PADDING_LEFT_RIGHT+mMove, thumbSlice.getHeight(), paintThumb);
+        canvas.drawRect(drawRight + thumbSliceRight.getWidth() - PADDING_LEFT_RIGHT+mMove, 0, getWidth()+mMove,
             thumbSlice.getHeight(), paintThumb);
 
         //画左右图标
-        canvas.drawBitmap(thumbSlice, drawLeft, 0, paintThumb);
-        canvas.drawBitmap(thumbSliceRight, drawRight, 0, paintThumb);
+        canvas.drawBitmap(thumbSlice, drawLeft+mMove, 0, paintThumb);
+        canvas.drawBitmap(thumbSliceRight, drawRight+mMove, 0, paintThumb);
     }
 
 
-    private float x = 0;
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
+        gestureDetector.onTouchEvent(event);
         if (!blocked) {
             int mx = (int) event.getX();
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    x = event.getRawX();
-
+                    mScroller.abortAnimation();
                     if (mx <= thumbSliceLeftX + thumbSliceHalfWidth * 2) {
                         if (mx >= thumbSliceLeftX) {
                             selectedThumb = SELECT_THUMB.SELECT_THUMB_LEFT;
@@ -279,15 +292,20 @@ public class CorpSeekBar extends View {
                         Log.e(TAG, "rect.right------------" + viewRect.right);
                         Log.e(TAG, "rect.bottom------------" + viewRect.bottom);
                         Log.e(TAG, "getWidth------------" + getWidth());
+
+                        int distance = mx - prevX;
+                        // smoothScrollBy(distance,0);
+                        if (scl != null) {
+                            scl.SeeKBarChange(mMove);
+                        }
+                        //             smoothScrollBy(-mMove, 0);
+                        // smoothScrollBy(xPosition - mLastX, 0);
                         // float rawX = event.getRawX();
                         // float deltaX = rawX - x;
                         // if (viewRect.left + deltaX+thumbSliceLeftX >= 0) {
                         //     setTranslationX(deltaX);
                         // }
-
-
                         // TODO: 2017/8/14 0014  View整体右移
-                        // int distance = mx - prevX;
                         // thumbSliceRightX += distance;
                     } else if (selectedThumb == SELECT_THUMB.SELECT_THUMB_MORE_LEFT) {
                         // TODO: 2017/8/14 0014  View整体左移
@@ -315,6 +333,7 @@ public class CorpSeekBar extends View {
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
+
                     downX = mx;
                     adjustSliceXY(mx);
                     selectedThumb = SELECT_THUMB.SELECT_THUMB_NONE;
@@ -329,7 +348,27 @@ public class CorpSeekBar extends View {
                 notifySeekBarValueChanged();
             }
         }
+
         return true;
+    }
+
+
+    //调用此方法设置滚动的相对偏移
+    public void smoothScrollBy(int dx, int dy) {
+        Log.e(TAG, "smoothScrollBy:" + dx);
+        //设置mScroller的滚动偏移量
+        mScroller.startScroll(mScroller.getFinalX(), mScroller.getFinalY(), dx, dy);
+        invalidate();//这里必须调用invalidate()才能保证computeScroll()会被调用，否则不一定会刷新界面，看不到滚动效果
+    }
+
+    @Override
+    public void computeScroll() {
+        Log.e(TAG, "-----------computeScroll");
+        if (mScroller.computeScrollOffset()) {
+            mMove = mScroller.getCurrX();
+            Log.e(TAG, "mMove:" + mMove);
+            postInvalidate();
+        }
     }
 
 
@@ -465,6 +504,7 @@ public class CorpSeekBar extends View {
 
     public interface SeekBarChangeListener {
         void SeekBarValueChanged(float leftThumb, float rightThumb, int whitchSide);
+        void SeeKBarChange(int distance);
         void onSeekStart();
         void onSeekEnd();
     }

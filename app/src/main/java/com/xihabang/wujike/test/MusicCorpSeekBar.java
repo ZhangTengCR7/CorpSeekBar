@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import static android.R.attr.y;
+
 /**
  * Created by wxmylife on 2017/8/10 0010.
  */
@@ -164,14 +166,10 @@ public class MusicCorpSeekBar extends View {
         paintThumb.setColor(getResources().getColor(resBackground));
         paintThumb.setAlpha((int) (255 * 0.9));
 
-        // canvas.drawRect(0, 0, drawLeft + PADDING_LEFT_RIGHT, thumbSliceLeft.getHeight(), paintThumb);
-        // canvas.drawRect(drawRight + thumbSliceRight.getWidth() - PADDING_LEFT_RIGHT, 0, getWidth(),
-        //     thumbSliceLeft.getHeight(), paintThumb);
-
         canvas.drawBitmap(thumbSliceLeft, drawLeft, 0, paintThumb);
         canvas.drawBitmap(thumbSliceRight, drawRight, 0, paintThumb);
     }
-    private float x = 0, y = 0;
+    private float x = 0;
     @Override public boolean onTouchEvent(MotionEvent event) {
         if (!blocked) {
             int touchX = (int) event.getX();
@@ -179,38 +177,23 @@ public class MusicCorpSeekBar extends View {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     x = event.getRawX();
-                    y = event.getRawY();
-                    Log.e("TVT", "--------->>>>ACTION_DOWN");
-                    // if (touchX <= thumbSliceLeftX + thumbSliceHalfWidth * 2 + DRAG_OFFSET) {
                     if (touchX <= thumbSliceLeftX + thumbSliceHalfWidth * 2) {
                         if (touchX >= thumbSliceLeftX) {
-                            Log.e("TVT", "--------->>>>SELECT_THUMB_LEFT");
                             selectedThumb = SELECT_THUMB.SELECT_THUMB_LEFT;
                         } else {
-                            Log.e("TVT", "--------->>>>SELECT_THUMB_MORE_LEFT");
                             selectedThumb = SELECT_THUMB.SELECT_THUMB_MORE_LEFT;
                         }
-                        // } else if (touchX >= thumbSliceRightX - thumbSliceHalfWidth * 2 - DRAG_OFFSET) {
                     } else if (touchX >= thumbSliceRightX - thumbSliceHalfWidth * 2-DRAG_OFFSET) {
 
                         if (touchX > thumbSliceRightX+thumbSliceHalfWidth*2+DRAG_OFFSET) {
-                            Log.e("TVT", "--------->>>>SELECT_THUMB_MORE_RIGHT");
                             selectedThumb = SELECT_THUMB.SELECT_THUMB_MORE_RIGHT;
                         } else if (touchX >= thumbSliceRightX - thumbSliceHalfWidth * 2-DRAG_OFFSET &&
                             touchX <= thumbSliceRightX+thumbSliceHalfWidth*2+DRAG_OFFSET) {
-                            Log.e("TVT", "--------->>>>SELECT_THUMB_RIGHT");
                             selectedThumb = SELECT_THUMB.SELECT_THUMB_RIGHT;
                         }
 
-                        // if (touchX <= thumbSliceRightX- thumbSliceHalfWidth * 2 ) {
-                        //     Log.e("TVT", "--------->>>>SELECT_THUMB_RIGHT");
-                        //     selectedThumb = SELECT_THUMB.SELECT_THUMB_RIGHT;
-                        // } else {
-                        //     Log.e("TVT", "--------->>>>SELECT_THUMB_MORE_RIGHT");
-                        //     selectedThumb = SELECT_THUMB.SELECT_THUMB_MORE_RIGHT;
-                        // }
+
                     } else {
-                        Log.e("TVT", "--------->>>>中间区域");
                         selectedThumb = SELECT_THUMB.SELECT_THUMB_CENTER;
                     }
                     downX = touchX;
@@ -220,106 +203,44 @@ public class MusicCorpSeekBar extends View {
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    Log.e("TVT", "--------->>>>ACTION_MOVE");
                     if (selectedThumb == SELECT_THUMB.SELECT_THUMB_LEFT) {
-                        Log.e("TVT", "----221----->>>>SELECT_THUMB_LEFT");
                         thumbSliceLeftX = touchX;
                     } else if (selectedThumb == SELECT_THUMB.SELECT_THUMB_RIGHT) {
-                        Log.e("TVT", "------224--->>>>SELECT_THUMB_RIGHT");
                         thumbSliceRightX = touchX;
                     } else if (selectedThumb == SELECT_THUMB.SELECT_THUMB_MORE_RIGHT) {
-                        Log.e("TVT", "--------->>>>SELECT_THUMB_MORE_RIGHT");
-                        Log.e("TVT", "--------->>>>touchX----" + touchX);
-                        Log.e("TVT", "--------->>>>prevX-----" + prevX);
                         int distance = touchX - prevX;
-                        // thumbSliceRightX += distance;
-                        int left = getLeft() + distance;
-                        int right = getRight() + distance;
-                        int top = getTop();
-                        // int bottom = getBottom();
-                        // float x=event.getX();
-                        // float translationX=getTranslationX();
-                        // float deltaX=(x-tX)+translationX;
-                        //
-                        // setTranslationX(deltaX);
-                        //
-                        // tX=event.getX();
+
                         float rawX = event.getRawX();
-                        float rawY = event.getRawY();
-
                         float translationX = getTranslationX();
-                        float translationY = getTranslationY();
-
                         float deltaX = (rawX - x) + translationX;
-                        float deltaY = (rawY - y) + translationY;
-                        final int[] location = new int[2];
-                        getLocationOnScreen(location);
-
-                        if (location[0]+deltaX>0){
-                            setTranslation(deltaX, deltaY);
-                        }else {
-                            setTranslationX(-location[0]);
-                        }
-
-
-                        int xwww=location[0];
+                        setTranslationX(deltaX);
 
                         x = event.getRawX();
-                        y = event.getRawY();
 
-                        // setTranslationX(distance);
-                        // offsetLeftAndRight(left);
-                        // scrollTo(distance,getScrollY());
-                        // requestLayout();
-                        // layout(left, top, right, bottom);
-                        // setTranslationX(distance);
-                        // AdditiveAnimator.animate(this).x(distance).y(getY()).setDuration(1000).start();
-                        // offsetLeftAndRight(distance);
-                        // AdditiveAnimator.animate(animatedView).x(event.getX()).y(event.getY()).setDuration(1000).start();
                     } else if (selectedThumb == SELECT_THUMB.SELECT_THUMB_MORE_LEFT) {
-                        Log.e("TVT", "-----246---->>>>SELECT_THUMB_MORE_LEFT");
                         int distance = touchX - prevX;
-                        //
-                        // float x=event.getX();
-                        // float translationX=getTranslationX();
-                        // float deltaX=(x-tX)+translationX;
-                        //
-                        // setTranslationX(deltaX);
-                        //
-                        // tX=event.getX();
-                        // thumbSliceLeftX += distance;
-                        // int left = getLeft() + distance;
-                        // int right = getRight() + distance;
-                        // int top = getTop();
-                        // int bottom = getBottom();
-                        // offsetLeftAndRight(distance);
-                        // layout(left,top,right,bottom);
-                        // this.setX(left);
-                        // requestLayout();
-                        // layout(left, top, right, bottom);
+                         float rawX = event.getRawX();
+
+                        float translationX = getTranslationX();
+
+                        float deltaX = (rawX - x) + translationX;
+                        setTranslationX(deltaX);
+
+                        x = event.getRawX();
                     } else if (selectedThumb == SELECT_THUMB.SELECT_THUMB_CENTER) {
-                        Log.e("TVT", "-----259---->>>>SELECT_THUMB_CENTER");
                         int distance = touchX - prevX;
                         if (thumbSliceLeftX==0||thumbSliceRightX==thumbMaxSliceRightx){
-
                             center = thumbSliceRightX - thumbSliceLeftX;
-
-
                             if (thumbSliceLeftX == 0 ) {
                                 if (touchX>prevX){
                                     selectedThumb=SELECT_THUMB.SELECT_THUMB_CENTER_RIGHT;
-                                    // thumbSliceRightX += distance;
-                                    // thumbSliceLeftX += distance;
                                 }
                                 thumbSliceRightX = thumbSliceLeftX + center;
                             }
                             if (thumbSliceRightX == thumbMaxSliceRightx ) {
                                 if (touchX<prevX){
                                     selectedThumb=SELECT_THUMB.SELECT_THUMB_CENTER_LEFT;
-                                    // thumbSliceRightX += distance;
-                                    // thumbSliceLeftX += distance;
                                 }
-                                Log.e("TVT", "----右边----->>>>---" );
                                 thumbSliceLeftX = thumbSliceRightX - center;
                             }
 
@@ -329,18 +250,14 @@ public class MusicCorpSeekBar extends View {
                         }
 
                     }else if (selectedThumb==SELECT_THUMB.SELECT_THUMB_CENTER_LEFT){
-                        Log.e("TVT", "---center-左边----->>>>---" );
                         int distance = touchX - prevX;
                         thumbSliceRightX += distance;
                         thumbSliceLeftX += distance;
                     }else if (selectedThumb==SELECT_THUMB.SELECT_THUMB_CENTER_RIGHT){
-                        Log.e("TVT", "--center--右边----->>>>---" );
                         int distance = touchX - prevX;
                         thumbSliceRightX += distance;
                         thumbSliceLeftX += distance;
                     }
-
-                    //>>>>>>>
 
                     if (adjustSliceXY(touchX)) {
                         break;
@@ -353,7 +270,6 @@ public class MusicCorpSeekBar extends View {
 
                     downX = touchX;
                     adjustSliceXY(touchX);
-                    //>>>>>>>>>
                     selectedThumb = SELECT_THUMB.SELECT_THUMB_NONE;
                     if (changeListener != null) {
                         changeListener.onSeekEnd();
@@ -370,11 +286,6 @@ public class MusicCorpSeekBar extends View {
         return true;
     }
 
-    private void setTranslation(float deltaX, float deltaY) {
-        // 正数往右，负数往左
-        setTranslationX(deltaX);
-        // setTranslationY(deltaY);
-    }
 
     private int center;
 
@@ -382,14 +293,8 @@ public class MusicCorpSeekBar extends View {
 
         boolean isNoneArea = false;
 
-
-
-
         int thumbSliceDistance = thumbSliceRightX - thumbSliceLeftX;
-        Log.e("TVT", "adjustSliceXY-------------thumbSliceRightX----" + thumbSliceRightX);
-        Log.e("TVT", "adjustSliceXY-------------thumbSliceLeftX----" + thumbSliceLeftX);
-        Log.e("TVT", "adjustSliceXY-------------thumbSliceDistance----" + thumbSliceDistance);
-        Log.e("TVT", "adjustSliceXY---------progressMinDiffPixels------" + progressMinDiffPixels);
+
         if (thumbSliceDistance <= progressMinDiffPixels
             && selectedThumb == SELECT_THUMB.SELECT_THUMB_MORE_RIGHT
             && touchX <= downX || thumbSliceDistance <= progressMinDiffPixels
@@ -407,7 +312,6 @@ public class MusicCorpSeekBar extends View {
             isNoneArea = true;
         }
 
-        Log.e("TVT", "--------->>>>isNoneArea---" + isNoneArea);
         if (isNoneArea) {
             if (selectedThumb == SELECT_THUMB.SELECT_THUMB_RIGHT ||
                 selectedThumb == SELECT_THUMB.SELECT_THUMB_MORE_RIGHT) {
@@ -418,14 +322,6 @@ public class MusicCorpSeekBar extends View {
             }
             return true;
         }
-
-        // if (touchX>thumbMaxSliceRightx&&(selectedThumb==SELECT_THUMB.SELECT_THUMB_CENTER)){
-        //     Log.e("TVT",thumbMaxSliceRightx+"-------thumbMaxSliceRightx");
-        //     thumbSliceRightX=thumbMaxSliceRightx;
-        //     thumbSliceLeftX=
-        //     return true;
-        //
-        // }
 
         if (touchX > thumbMaxSliceRightx && (selectedThumb == SELECT_THUMB.SELECT_THUMB_RIGHT ||
             selectedThumb == SELECT_THUMB.SELECT_THUMB_MORE_RIGHT)) {
@@ -568,7 +464,6 @@ public class MusicCorpSeekBar extends View {
         void onSeekStart();
         void onSeekEnd();
     }
-
 
 
 }
